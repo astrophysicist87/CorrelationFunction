@@ -55,11 +55,6 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 	currentfolderindex = -1;
 	current_level_of_output = 0;
 
-	//just need this for various dummy momentum calculations
-	P_eval = new double [4];
-	Pp = new double [4];
-	Pm = new double [4];
-
 	n_zeta_pts = 12;
 	n_v_pts = 12;
 	n_s_pts = 12;
@@ -72,13 +67,6 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 	use_delta_f = true;
 	no_df_stem = "";
 	current_FOsurf_ptr = FOsurf_ptr;
-	Emissionfunction_ptr = new vector<Emissionfunction_data> (1);
-//cerr << "made it inside!" << endl;
-	if (INCLUDE_SOURCE_VARIANCES)
-		n_weighting_functions = 15;	//AKA, number of SV's
-	else
-		n_weighting_functions = 1;	//just spectra
-	zvec = new double [4];
 
 //****************************************************************************************************
 //OLD CODE FOR READING IN SELECTED decay_channels...
@@ -167,13 +155,8 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 				
 				//check if particle lifetime is too long for inclusion in source variances
 				bool lifetime_is_too_long = false;
-				if (CHECK_FOR_LIFETIME && decay_channels[temp_idx].resonance_Gamma < hbarC / max_lifetime)
+				if (decay_channels[temp_idx].resonance_Gamma < hbarC / max_lifetime)
 					lifetime_is_too_long = true;		//i.e., for lifetimes longer than 100 fm/c, skip decay channel
-
-				//check if decay channel has too many daughters (nbody >= 4)
-				//bool too_many_daughters = false;
-				//if (CHECK_NBODY && decay_channels.nbody[temp_idx] >= 4)
-				//	too_many_daughters = true;
 
 				if (VERBOSE > 0) *global_out_stream_ptr << "Resonance = " << decay_channels[temp_idx].resonance_name << ", decay channel " << idecay + 1
 						<< ": mu=" << decay_channels[temp_idx].resonance_mu
@@ -181,9 +164,6 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 						<< ", M=" << decay_channels[temp_idx].resonance_mass << ", nbody=" << decay_channels[temp_idx].nbody
 						<< ", Gamma=" << decay_channels[temp_idx].resonance_Gamma << ", total br=" << decay_channels[temp_idx].resonance_total_br
 						<< ", direct br=" << decay_channels[temp_idx].resonance_direct_br << endl;
-
-				//set daughter particles masses for each decay channel
-				//currently assuming no more than nbody = 3
 
 				if (VERBOSE > 0) *global_out_stream_ptr << "Resonance = " << decay_channels[temp_idx].resonance_name << ": ";
 				for (int decay_part_idx = 0; decay_part_idx < decay_channels[temp_idx].nbody; decay_part_idx++)
@@ -210,32 +190,43 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 	//*****************************************************************
 	// Only make dN_dypTdpTdphi_moments large enough to hold all necessary resonance, not decay channels
 	//*****************************************************************
-	dN_dypTdpTdphi_moments = new double *** [Nparticle];
-	ln_dN_dypTdpTdphi_moments = new double *** [Nparticle];
-	sign_of_dN_dypTdpTdphi_moments = new double *** [Nparticle];
+	dN_dypTdpTdphi_moments = new double ***** [Nparticle];
+	ln_dN_dypTdpTdphi_moments = new double ***** [Nparticle];
+	sign_of_dN_dypTdpTdphi_moments = new double ***** [Nparticle];
 	for (int ir=0; ir<Nparticle; ir++)
 	{
-		dN_dypTdpTdphi_moments[ir] = new double ** [n_weighting_functions];
-		ln_dN_dypTdpTdphi_moments[ir] = new double ** [n_weighting_functions];
-		sign_of_dN_dypTdpTdphi_moments[ir] = new double ** [n_weighting_functions];
-		for (int wfi=0; wfi<n_weighting_functions; wfi++)
-		{
-			dN_dypTdpTdphi_moments[ir][wfi] = new double * [n_interp_pT_pts];
-			ln_dN_dypTdpTdphi_moments[ir][wfi] = new double * [n_interp_pT_pts];
-			sign_of_dN_dypTdpTdphi_moments[ir][wfi] = new double * [n_interp_pT_pts];
-			for (int ipT=0; ipT<n_interp_pT_pts; ipT++)
-			{
-				dN_dypTdpTdphi_moments[ir][wfi][ipT] = new double [n_interp_pphi_pts];
-				ln_dN_dypTdpTdphi_moments[ir][wfi][ipT] = new double [n_interp_pphi_pts];
-				sign_of_dN_dypTdpTdphi_moments[ir][wfi][ipT] = new double [n_interp_pphi_pts];
-				for (int ipphi=0; ipphi<n_interp_pphi_pts; ipphi++)
-					{
-						dN_dypTdpTdphi_moments[ir][wfi][ipT][ipphi] = 0.0;
-						ln_dN_dypTdpTdphi_moments[ir][wfi][ipT][ipphi] = 0.0;
-						sign_of_dN_dypTdpTdphi_moments[ir][wfi][ipT][ipphi] = 0.0;
-					}
-			}
-		}
+		dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
+		ln_dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
+		sign_of_dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
+        for (int iq = 0; iq < qnpts; ++iq)
+        {
+		    dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+            ln_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+		    sign_of_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+            for (int iqax = 0; iqax < 3; ++iqax)
+            {
+		        dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
+                ln_dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
+		        sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
+                for (int itrig = 0; itrig < 2; ++itrig)
+                {
+		            dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+                    ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+		            sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+				    for (int ipT = 0; ipT < n_interp_pT_pts; ++ipT)
+				    {
+		                dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double n_interp_pphi_pts];
+                        ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double n_interp_pphi_pts];
+		                sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double [n_interp_pphi_pts];
+                        for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
+                        {
+		                    dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
+                            ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
+		                    sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
+                        }
+                        }
+                        }
+                        			
 	}
 
 	s_pts = new double * [n_decay_channels];
@@ -742,6 +733,13 @@ void CorrelationFunction::Delete_decay_channel_info()
 	return;
 }
 
+void CorrelationFunction::Set_q_points()
+{
+	q_pts = new double [qnpts];
+	for (int iq = 0; iq < qnpts; ++iq)
+		q_pts = init_q + (double)iq * delta_q;
+}
+
 bool CorrelationFunction::fexists(const char *filename)
 {
   ifstream ifile(filename);
@@ -845,13 +843,72 @@ int CorrelationFunction::lookup_resonance_idx_from_particle_id(int pid)
 	return (result);
 }
 
+void CorrelationFunction::Allocate_resonance_running_sum_vectors()
+{
+    ssum_vec = new double ** [qnpts];
+    vsum_vec = new double ** [qnpts];
+    zetasum_vec = new double ** [qnpts];
+    Csum_vec = new double ** [qnpts];
+	for (int iq = 0; iq < qnpts; ++iq)
+	{
+        ssum_vec[iq] = new double * [3];
+        vsum_vec[iq] = new double * [3];
+        zetasum_vec[iq] = new double * [3];
+        Csum_vec[iq] = new double * [3];
+	    for (int iqax = 0; iqax < 3; ++iqax)
+	    {
+            ssum_vec[iq][iqax] = new double [2];
+            vsum_vec[iq][iqax] = new double [2];
+            zetasum_vec[iq][iqax] = new double [2];
+            Csum_vec[iq][iqax] = new double [2];
+	        for (int itrig = 0; itrig < 2; ++itrig)
+	        {
+		        ssum_vec[iq][iqax][itrig] = 0.0;
+		        vsum_vec[iq][iqax][itrig] = 0.0;
+		        zetasum_vec[iq][iqax][itrig] = 0.0;
+		        Csum_vec[iq][iqax][itrig] = 0.0;
+            }
+        }
+    }
+}
+
+void CorrelationFunction::Delete_resonance_running_sum_vectors()
+{
+	for (int iq = 0; iq < qnpts; ++iq)
+	{
+	    for (int iqax = 0; iqax < 3; ++iqax)
+	    {
+            delete [] ssum_vec[iq][iqax];
+            delete [] vsum_vec[iq][iqax];
+            delete [] zetasum_vec[iq][iqax];
+            delete [] Csum_vec[iq][iqax];
+        }
+        delete [] ssum_vec[iq];
+        delete [] vsum_vec[iq];
+        delete [] zetasum_vec[iq];
+        delete [] Csum_vec[iq];
+    }
+    delete [] ssum_vec;
+    delete [] vsum_vec;
+    delete [] zetasum_vec;
+    delete [] Csum_vec;
+}
+
+void CorrelationFunction::Zero_resonance_running_sum_vector(double *** vec)
+{
+	for (int iq = 0; iq < qnpts; ++iq)
+	for (int iqax = 0; iqax < 3; ++iqax)
+	for (int itrig = 0; itrig < 2; ++itrig)
+		vec[iq][iqax][itrig] = 0.0;
+}
+
 inline double CorrelationFunction::lin_int(double x_m_x1, double one_by_x2_m_x1, double f1, double f2)
 {
 	return ( f1 + (f2 - f1) * x_m_x1 * one_by_x2_m_x1 );
 }
 
-void CorrelationFunction::Edndp3(double ptr, double phir, double * results)
-{//move loop over n_weighting_functions inside this function
+void CorrelationFunction::Edndp3(double ptr, double phir, double *** results)
+{
 	double phi0, phi1;
 	double f1, f2;
 
@@ -898,69 +955,79 @@ void CorrelationFunction::Edndp3(double ptr, double phir, double * results)
 
 	double one_by_pTdiff = 1./(pT1 - pT0), one_by_pphidiff = 1./(phi1 - phi0);
 
-	for (int wfi = 0; wfi < n_weighting_functions; ++wfi)
+	for (int iq = 0; iq < qnpts; ++iq)
 	{
-		double ** temp_res_sign_info = res_sign_info[wfi];
-		double ** temp_res_log_info = res_log_info[wfi];
-		double ** temp_res_moments_info = res_moments_info[wfi];
+		double **** temp_res_sign_info = res_sign_info[iq];
+		double **** temp_res_log_info = res_log_info[iq];
+		double **** temp_res_moments_info = res_moments_info[iq];
+		for (int iqax = 0; iqax < 3; ++iqax)
+		{
+			double *** temp2_res_sign_info = temp_res_sign_info[iqax];
+			double *** temp2_res_log_info = temp_res_log_info[iqax];
+			double *** temp2_res_moments_info = temp_res_moments_info[iqax];
+			for (int itrig = 0; itrig < 2; ++itrig)
+			{
+				double ** temp3_res_sign_info = temp2_res_sign_info[itrig];
+				double ** temp3_res_log_info = temp2_res_log_info[itrig];
+				double ** temp3_res_moments_info = temp2_res_moments_info[itrig];
+				// interpolate over pT values first
+				if(ptr > PTCHANGE)				// if pT interpolation point is larger than PTCHANGE (currently 1.0 GeV)
+				{
+					double sign_of_f11 = temp3_res_sign_info[npt-1][nphim1];
+					double sign_of_f12 = temp3_res_sign_info[npt-1][nphi];
+					double sign_of_f21 = temp3_res_sign_info[npt][nphim1];
+					double sign_of_f22 = temp3_res_sign_info[npt][nphi];
+			
+					//*******************************************************************************************************************
+					// set f1 first
+					//*******************************************************************************************************************
+					// if using extrapolation and spectra at pT1 has larger magnitude than at pT0, just return zero
+					if (ptr > pT1 && temp3_res_log_info[npt][nphim1] > temp3_res_log_info[npt-1][nphim1])
+						f1 = 0.0;
+					else if (sign_of_f11 * sign_of_f21 > 0)	// if the two points have the same sign in the pT direction, interpolate logs
+						f1 = sign_of_f11 * exp( lin_int(ptr-pT0, one_by_pTdiff, temp3_res_log_info[npt-1][nphim1], temp3_res_log_info[npt][nphim1]) );
+					else					// otherwise, just interpolate original vals
+						f1 = lin_int(ptr-pT0, one_by_pTdiff, temp3_res_moments_info[npt-1][nphim1], temp3_res_moments_info[npt][nphim1]);
 		
-		// interpolate over pT values first
-		if(ptr > PTCHANGE)				// if pT interpolation point is larger than PTCHANGE (currently 1.0 GeV)
-		{
-			double sign_of_f11 = temp_res_sign_info[npt-1][nphim1];
-			double sign_of_f12 = temp_res_sign_info[npt-1][nphi];
-			double sign_of_f21 = temp_res_sign_info[npt][nphim1];
-			double sign_of_f22 = temp_res_sign_info[npt][nphi];
-	
-			//*******************************************************************************************************************
-			// set f1 first
-			//*******************************************************************************************************************
-			// if using extrapolation and spectra at pT1 has larger magnitude than at pT0, just return zero
-			if (ptr > pT1 && temp_res_log_info[npt][nphim1] > temp_res_log_info[npt-1][nphim1])
-				f1 = 0.0;
-			else if (sign_of_f11 * sign_of_f21 > 0)	// if the two points have the same sign in the pT direction, interpolate logs
-				f1 = sign_of_f11 * exp( lin_int(ptr-pT0, one_by_pTdiff, temp_res_log_info[npt-1][nphim1], temp_res_log_info[npt][nphim1]) );
-			else					// otherwise, just interpolate original vals
-				f1 = lin_int(ptr-pT0, one_by_pTdiff, temp_res_moments_info[npt-1][nphim1], temp_res_moments_info[npt][nphim1]);
-
-			//*******************************************************************************************************************
-			// set f2 next
-			//*******************************************************************************************************************
-			if (ptr > pT1 && temp_res_log_info[npt][nphi] > temp_res_log_info[npt-1][nphi])
-				f2 = 0.0;
-			else if (sign_of_f12 * sign_of_f22 > 0)	// if the two points have the same sign in the pT direction, interpolate logs
-				f2 = sign_of_f12 * exp( lin_int(ptr-pT0, one_by_pTdiff, temp_res_log_info[npt-1][nphi], temp_res_log_info[npt][nphi]) );
-			else					// otherwise, just interpolate original vals
-				f2 = lin_int(ptr-pT0, one_by_pTdiff, temp_res_moments_info[npt-1][nphi], temp_res_moments_info[npt][nphi]);
-			//*******************************************************************************************************************
-		}
-		else						// if pT is smaller than PTCHANGE, just use linear interpolation, no matter what
-		{
-			f1 = lin_int(ptr-pT0, one_by_pTdiff, temp_res_moments_info[npt-1][nphim1], temp_res_moments_info[npt][nphim1]);
-			f2 = lin_int(ptr-pT0, one_by_pTdiff, temp_res_moments_info[npt-1][nphi], temp_res_moments_info[npt][nphi]);
-
-		}
-	
-		// now, interpolate f1 and f2 over the pphi direction
-		results[wfi] = lin_int(phir-phi0, one_by_pphidiff, f1, f2);
-	
-		if ( isnan( results[wfi] ) )
-		{
-			*global_out_stream_ptr << "ERROR in Edndp3(double, double, double*): problems encountered!" << endl
-				<< "results[" << wfi << "] = " << setw(8) << setprecision(15) << results[wfi] << endl
-				<< "  --> ptr = " << ptr << endl
-				<< "  --> pt0 = " << pT0 << endl
-				<< "  --> pt1 = " << pT1 << endl
-				<< "  --> phir = " << phir << endl
-				<< "  --> phi0 = " << phi0 << endl
-				<< "  --> phi1 = " << phi1 << endl
-				<< "  --> f11 = " << temp_res_moments_info[npt-1][nphim1] << endl
-				<< "  --> f12 = " << temp_res_moments_info[npt-1][nphi] << endl
-				<< "  --> f21 = " << temp_res_moments_info[npt][nphim1] << endl
-				<< "  --> f22 = " << temp_res_moments_info[npt][nphi] << endl
-				<< "  --> f1 = " << f1 << endl
-				<< "  --> f2 = " << f2 << endl;
-			exit(1);
+					//*******************************************************************************************************************
+					// set f2 next
+					//*******************************************************************************************************************
+					if (ptr > pT1 && temp3_res_log_info[npt][nphi] > temp3_res_log_info[npt-1][nphi])
+						f2 = 0.0;
+					else if (sign_of_f12 * sign_of_f22 > 0)	// if the two points have the same sign in the pT direction, interpolate logs
+						f2 = sign_of_f12 * exp( lin_int(ptr-pT0, one_by_pTdiff, temp3_res_log_info[npt-1][nphi], temp3_res_log_info[npt][nphi]) );
+					else					// otherwise, just interpolate original vals
+						f2 = lin_int(ptr-pT0, one_by_pTdiff, temp3_res_moments_info[npt-1][nphi], temp3_res_moments_info[npt][nphi]);
+					//*******************************************************************************************************************
+				}
+				else						// if pT is smaller than PTCHANGE, just use linear interpolation, no matter what
+				{
+					f1 = lin_int(ptr-pT0, one_by_pTdiff, temp3_res_moments_info[npt-1][nphim1], temp3_res_moments_info[npt][nphim1]);
+					f2 = lin_int(ptr-pT0, one_by_pTdiff, temp3_res_moments_info[npt-1][nphi], temp3_res_moments_info[npt][nphi]);
+				}
+			
+				// now, interpolate f1 and f2 over the pphi direction
+				results[iq][iqax][itrig] += lin_int(phir-phi0, one_by_pphidiff, f1, f2);
+			
+				if ( isnan( results[wfi] ) )
+				{
+					*global_out_stream_ptr << "ERROR in Edndp3(double, double, double*): problems encountered!" << endl
+						<< "results[" << wfi << "] = " << setw(8) << setprecision(15) << results[wfi] << endl
+						<< "  --> ptr = " << ptr << endl
+						<< "  --> pt0 = " << pT0 << endl
+						<< "  --> pt1 = " << pT1 << endl
+						<< "  --> phir = " << phir << endl
+						<< "  --> phi0 = " << phi0 << endl
+						<< "  --> phi1 = " << phi1 << endl
+						<< "  --> f11 = " << temp3_res_moments_info[npt-1][nphim1] << endl
+						<< "  --> f12 = " << temp3_res_moments_info[npt-1][nphi] << endl
+						<< "  --> f21 = " << temp3_res_moments_info[npt][nphim1] << endl
+						<< "  --> f22 = " << temp3_res_moments_info[npt][nphi] << endl
+						<< "  --> f1 = " << f1 << endl
+						<< "  --> f2 = " << f2 << endl;
+					exit(1);
+				}
+			}
 		}
 	}
 

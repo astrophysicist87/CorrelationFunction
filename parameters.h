@@ -13,17 +13,15 @@ using namespace std;
 #define GROUPING_PARTICLES 		0		// set to 1 to perform calculations for similar particles together
 #define PARTICLE_DIFF_TOLERANCE 	0.00		// particles with mass and chemical potential (for each FO-cell) difference less than this value
 							// will be considered to be identical (b/c Cooper-Frye)
-#define USE_PLANE_PSI_ORDER 		0		// specifies whether to do HBT relative to flow-plane angle,
-							// and at what order: 0 - use plane_psi = 0.0, !0 - use flow-plane angle at given order
 #define TRUNCATE_COOPER_FRYE		true		// ignore contributions to CF integral which are extremely small --> speeds up code by factor of 3-4
 #define VERBOSE 			1		// specifies level of output - 0 is lowest (no output)
 #define DEBUG				false		// flag for output of debugging statements
 #define SPACETIME_MOMENTS_ONLY		false		// duh
-#define CHECK_FOR_LIFETIME		false		// true means skip particles which are too long-lived
 #define DO_ALL_DECAY_CHANNELS		true		// duh
-#define INCLUDE_SOURCE_VARIANCES	false		// false means do spectra only
 
-const double hbarC=0.197327053;  //GeV*fm
+const double hbarC=0.197327053;		//GeV*fm
+const double hbarC3=0.00768351405;
+const double hbarCm1=5.067728853;
 const double twopi = 2.*M_PI;
 const double MeVToGeV = 0.001;
 

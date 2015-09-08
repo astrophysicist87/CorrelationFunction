@@ -27,14 +27,6 @@ using namespace std;
 
 typedef struct
 {
-   double t, x, y, z;
-   double r, phi;
-   double tau, eta;
-   double data;
-}Emissionfunction_data;
-
-typedef struct
-{
    int resonance_particle_id;		// keeps track of current resonance's index in all_particles array
    int resonance_idx;			// keeps track of current resonance's index in chosen_resonances vector
    int nbody;
@@ -111,14 +103,10 @@ class CorrelationFunction
 		double ****** FOI_source_variances;
 		//*************************************************************
 		
-		//array to temporarily hold results of resonance SV integrations
-		int n_weighting_functions;  //number of source variances to consider
-		//double * source_variances_array;
-		double **** integrated_spacetime_moments;
-		double **** dN_dypTdpTdphi_moments;
-		double **** ln_dN_dypTdpTdphi_moments;
-		double **** sign_of_dN_dypTdpTdphi_moments;
-		double **** all_particles_dN_dypTdpTdphi_moments;
+		//arrays to hold results of resonance phase-space integrations
+		double ****** dN_dypTdpTdphi_moments;
+		double ****** ln_dN_dypTdpTdphi_moments;
+		double ****** sign_of_dN_dypTdpTdphi_moments;
 	
 		//needed for resonance calculations
 		//kinematic info
@@ -173,8 +161,6 @@ class CorrelationFunction
 		double VEC_n2_spt, VEC_n2_pstar, VEC_n2_Estar, VEC_n2_psBmT, VEC_n2_DeltaY, VEC_n2_Yp, VEC_n2_Ym;
 		double * VEC_n2_P_Y, * VEC_n2_MTbar, * VEC_n2_DeltaMT, * VEC_n2_MTp, * VEC_n2_MTm;
 		double ** VEC_n2_MT, ** VEC_n2_PPhi_tilde, ** VEC_n2_PPhi_tildeFLIP, ** VEC_n2_PT;
-		double *** VEC_n2_Pp, *** VEC_n2_Pm, *** VEC_n2_alpha, *** VEC_n2_alpha_m;
-		//double ** VEC_n2_PpT, ** VEC_n2_Ppphi;
 		double VEC_n2_s_factor;
 		double * VEC_n2_v_factor;
 		double ** VEC_n2_zeta_factor;
@@ -183,10 +169,7 @@ class CorrelationFunction
 		double * VEC_pstar, * VEC_Estar, * VEC_DeltaY, * VEC_Yp, * VEC_Ym, * VEC_s_factor, * VEC_g_s;
 		double ** VEC_P_Y, ** VEC_MTbar, ** VEC_DeltaMT, ** VEC_MTp, ** VEC_MTm, ** VEC_v_factor;
 		double *** VEC_MT, *** VEC_PPhi_tilde, *** VEC_PPhi_tildeFLIP, *** VEC_PT, *** VEC_zeta_factor;
-		double **** VEC_Pp, **** VEC_alpha, **** VEC_Pm, **** VEC_alpha_m;
-		
-		//array to hold momenta to be integrated over in resonance calculations
-		//momentum_data**** Pplus;
+        double *** ssum_vec, *** vsum_vec, *** zetasum_vec, *** Csum_vec;
 		
 		//Emission function
 		vector<Emissionfunction_data>* Emissionfunction_ptr;
@@ -194,9 +177,10 @@ class CorrelationFunction
 		int Emissionfunction_length;
 		vector<Emissionfunction_data>* avgFOsurf_ptr;
 		
-		double spectra;
+		double *** spectra;
+        double **** CFvals;
 		
-		double * q_out, * q_side, * q_long;
+		double * q_out, * q_side, * q_long, * q_pts, * q_axes;
 		
 		//store correlation functions
 		double * Correl_1D_out;
@@ -206,12 +190,6 @@ class CorrelationFunction
 		double * Correl_1D_long;
 		double * Correl_1D_long_err;
 
-		//source variances
-		double **S_func;
-		double **xs_S, **xo_S, **xl_S, **t_S;
-		double **xs2_S, **xo2_S, **xl2_S, **t2_S;
-		double **xo_xs_S, **xl_xs_S, **xs_t_S, **xo_xl_S, **xo_t_S, **xl_t_S;
-		
 		//HBT radii coefficients
 		double **R2_side, **R2_out, **R2_long, **R2_outside, **R2_sidelong, **R2_outlong;
 		double **R2_side_C, **R2_side_S;
@@ -221,7 +199,7 @@ class CorrelationFunction
 		double **R2_outlong_C, **R2_outlong_S;
 		double **R2_sidelong_C, **R2_sidelong_S;
 
-		double *** res_sign_info, *** res_log_info, *** res_moments_info;
+		double ***** res_sign_info, ***** res_log_info, ***** res_moments_info;
 
 		
 		//miscellaneous
@@ -289,14 +267,11 @@ class CorrelationFunction
 		double g(double s);
 		inline void set_to_zero(double * array, size_t arraylength);
 		void adaptive_simpson_integration(void (CorrelationFunction::*f) (double, double *), double a, double b, double * results);
-		double S_direct(double r, double eta, double tau, double MT, double PT, double cos_phi_m_Phi);
 		double place_in_range(double phi, double min, double max);
 		void Get_current_decay_string(int dc_idx, string * decay_string);
 		int lookup_resonance_idx_from_particle_id(int particle_id);
-		static inline double lin_int(double x1, double one_by_x2_m_x1, double f1, double f2, double x);
-		static inline double lin_int2(double x_m_x1, double one_by_x2_m_x1, double f1, double f2);
-		double Edndp3(double ptr, double phir, int local_pid, int wfi);
-		void Edndp3(double ptr, double phir, double * results);
+		static inline double lin_int(double x_m_x1, double one_by_x2_m_x1, double f1, double f2);
+		void Edndp3(double ptr, double phir, double *** results);
 
 		// input and output function prototypes
 		void Output_dN_dypTdpTdphi(int folderindex);
