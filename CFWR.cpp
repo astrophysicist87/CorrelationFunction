@@ -159,7 +159,7 @@ bool CorrelationFunction::Do_this_decay_channel(int dc_idx)
 }
 
 // ************************************************************
-// Checks whether to do daughter particle for given decay channel
+// Checks whether to do daughter particle for any given decay channel
 // ************************************************************
 bool CorrelationFunction::Do_this_daughter_particle(int dc_idx, int daughter_idx, int * daughter_resonance_pid)
 {
