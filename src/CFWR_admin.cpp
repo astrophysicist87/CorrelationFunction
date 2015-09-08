@@ -198,35 +198,36 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 		dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
 		ln_dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
 		sign_of_dN_dypTdpTdphi_moments[ir] = new double **** [qnpts];
-        for (int iq = 0; iq < qnpts; ++iq)
-        {
-		    dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
-            ln_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
-		    sign_of_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
-            for (int iqax = 0; iqax < 3; ++iqax)
-            {
-		        dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
-                ln_dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
+		for (int iq = 0; iq < qnpts; ++iq)
+		{
+			dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+			ln_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+			sign_of_dN_dypTdpTdphi_moments[ir][iq] = new double *** [3];
+			for (int iqax = 0; iqax < 3; ++iqax)
+			{
+				dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
+				ln_dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
 		        sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax] = new double ** [2];
-                for (int itrig = 0; itrig < 2; ++itrig)
-                {
-		            dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
-                    ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
-		            sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
-				    for (int ipT = 0; ipT < n_interp_pT_pts; ++ipT)
-				    {
-		                dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double n_interp_pphi_pts];
-                        ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double n_interp_pphi_pts];
+				for (int itrig = 0; itrig < 2; ++itrig)
+				{
+					dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+					ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+					sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig] = new double * [n_interp_pT_pts];
+					for (int ipT = 0; ipT < n_interp_pT_pts; ++ipT)
+					{
+						dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double [n_interp_pphi_pts];
+                        ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double [n_interp_pphi_pts];
 		                sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT] = new double [n_interp_pphi_pts];
                         for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
-                        {
-		                    dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
+						{
+							dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
                             ln_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
 		                    sign_of_dN_dypTdpTdphi_moments[ir][iq][iqax][itrig][ipT][ipphi] = 0.0;
                         }
-                        }
-                        }
-                        			
+					}
+				}
+			}
+		}
 	}
 
 	s_pts = new double * [n_decay_channels];
@@ -490,8 +491,6 @@ for(int i=0; i<n_localp_T; i++)
 
 CorrelationFunction::~CorrelationFunction()
 {
-   delete Emissionfunction_ptr;
-
    delete[] SP_pT;
    delete[] SP_pT_weight;
    delete[] SP_pphi;
@@ -540,28 +539,13 @@ void CorrelationFunction::Allocate_decay_channel_info()
 	VEC_n2_PPhi_tilde = new double * [n_v_pts];
 	VEC_n2_PPhi_tildeFLIP = new double * [n_v_pts];
 	VEC_n2_PT = new double * [n_v_pts];
-	VEC_n2_Pp = new double ** [n_v_pts];
-	VEC_n2_alpha = new double ** [n_v_pts];
-	VEC_n2_Pm = new double ** [n_v_pts];
-	VEC_n2_alpha_m = new double ** [n_v_pts];
 	for(int iv = 0; iv < n_v_pts; ++iv)
 	{
 		VEC_n2_MT[iv] = new double [n_zeta_pts];
 		VEC_n2_PPhi_tilde[iv] = new double [n_zeta_pts];
 		VEC_n2_PPhi_tildeFLIP[iv] = new double [n_zeta_pts];
 		VEC_n2_PT[iv] = new double [n_zeta_pts];
-		VEC_n2_Pp[iv] = new double * [n_zeta_pts];
-		VEC_n2_alpha[iv] = new double * [n_zeta_pts];
-		VEC_n2_Pm[iv] = new double * [n_zeta_pts];
-		VEC_n2_alpha_m[iv] = new double * [n_zeta_pts];
 		VEC_n2_zeta_factor[iv] = new double [n_zeta_pts];
-		for(int izeta = 0; izeta < n_zeta_pts; ++izeta)
-		{
-			VEC_n2_Pp[iv][izeta] = new double [4];
-			VEC_n2_alpha[iv][izeta] = new double [4];
-			VEC_n2_Pm[iv][izeta] = new double [4];
-			VEC_n2_alpha_m[iv][izeta] = new double [4];
-		}
 	}
 	NEW_s_pts = new double [n_s_pts];
 	NEW_s_wts = new double [n_s_pts];
@@ -583,10 +567,6 @@ void CorrelationFunction::Allocate_decay_channel_info()
 	VEC_PPhi_tilde = new double ** [n_s_pts];
 	VEC_PPhi_tildeFLIP = new double ** [n_s_pts];
 	VEC_PT = new double ** [n_s_pts];
-	VEC_Pp = new double *** [n_s_pts];
-	VEC_alpha = new double *** [n_s_pts];
-	VEC_Pm = new double *** [n_s_pts];
-	VEC_alpha_m = new double *** [n_s_pts];
 	for(int is = 0; is < n_s_pts; ++is)
 	{
 		VEC_v_factor[is] = new double [n_v_pts];
@@ -600,28 +580,13 @@ void CorrelationFunction::Allocate_decay_channel_info()
 		VEC_PPhi_tilde[is] = new double * [n_v_pts];
 		VEC_PPhi_tildeFLIP[is] = new double * [n_v_pts];
 		VEC_PT[is] = new double * [n_v_pts];
-		VEC_Pp[is] = new double ** [n_v_pts];
-		VEC_alpha[is] = new double ** [n_v_pts];
-		VEC_Pm[is] = new double ** [n_v_pts];
-		VEC_alpha_m[is] = new double ** [n_v_pts];
 		for(int iv = 0; iv < n_v_pts; ++iv)
 		{
 			VEC_MT[is][iv] = new double [n_zeta_pts];
 			VEC_PPhi_tilde[is][iv] = new double [n_zeta_pts];
 			VEC_PPhi_tildeFLIP[is][iv] = new double [n_zeta_pts];
 			VEC_PT[is][iv] = new double [n_zeta_pts];
-			VEC_Pp[is][iv] = new double * [n_zeta_pts];
-			VEC_alpha[is][iv] = new double * [n_zeta_pts];
-			VEC_Pm[is][iv] = new double * [n_zeta_pts];
-			VEC_alpha_m[is][iv] = new double * [n_zeta_pts];
 			VEC_zeta_factor[is][iv] = new double [n_zeta_pts];
-			for(int izeta = 0; izeta < n_zeta_pts; ++izeta)
-			{
-				VEC_Pp[is][iv][izeta] = new double [4];
-				VEC_alpha[is][iv][izeta] = new double [4];
-				VEC_Pm[is][iv][izeta] = new double [4];
-				VEC_alpha_m[is][iv][izeta] = new double [4];
-			}
 		}
 	}
 	if (VERBOSE > 2) *global_out_stream_ptr << "Reallocated memory for decay channel information." << endl;
@@ -634,21 +599,10 @@ void CorrelationFunction::Delete_decay_channel_info()
 	if (VERBOSE > 2) *global_out_stream_ptr << "Deleting memory for decay channel information..." << endl;
 	for(int iv = 0; iv < n_v_pts; ++iv)
 	{
-		for(int izeta = 0; izeta < n_zeta_pts; ++izeta)
-		{
-			delete [] VEC_n2_Pp[iv][izeta];
-			delete [] VEC_n2_alpha[iv][izeta];
-			delete [] VEC_n2_Pm[iv][izeta];
-			delete [] VEC_n2_alpha_m[iv][izeta];
-		}
 		delete [] VEC_n2_MT[iv];
 		delete [] VEC_n2_PPhi_tilde[iv];
 		delete [] VEC_n2_PPhi_tildeFLIP[iv];
 		delete [] VEC_n2_PT[iv];
-		delete [] VEC_n2_Pp[iv];
-		delete [] VEC_n2_alpha[iv];
-		delete [] VEC_n2_Pm[iv];
-		delete [] VEC_n2_alpha_m[iv];
 		delete [] VEC_n2_zeta_factor[iv];
 	}
 	delete [] VEC_n2_v_factor;
@@ -662,30 +616,15 @@ void CorrelationFunction::Delete_decay_channel_info()
 	delete [] VEC_n2_PPhi_tilde;
 	delete [] VEC_n2_PPhi_tildeFLIP;
 	delete [] VEC_n2_PT;
-	delete [] VEC_n2_Pp;
-	delete [] VEC_n2_alpha;
-	delete [] VEC_n2_Pm;
-	delete [] VEC_n2_alpha_m;
 
 	for(int is = 0; is < n_s_pts; ++is)
 	{
 		for(int iv = 0; iv < n_v_pts; ++iv)
 		{
-			for(int izeta = 0; izeta < n_zeta_pts; ++izeta)
-			{
-				delete [] VEC_Pp[is][iv][izeta];
-				delete [] VEC_alpha[is][iv][izeta];
-				delete [] VEC_Pm[is][iv][izeta];
-				delete [] VEC_alpha_m[is][iv][izeta];
-			}
 			delete [] VEC_MT[is][iv];
 			delete [] VEC_PPhi_tilde[is][iv];
 			delete [] VEC_PPhi_tildeFLIP[is][iv];
 			delete [] VEC_PT[is][iv];
-			delete [] VEC_Pp[is][iv];
-			delete [] VEC_alpha[is][iv];
-			delete [] VEC_Pm[is][iv];
-			delete [] VEC_alpha_m[is][iv];
 			delete [] VEC_zeta_factor[is][iv];
 		}
 		delete [] VEC_v_factor[is];
@@ -699,10 +638,6 @@ void CorrelationFunction::Delete_decay_channel_info()
 		delete [] VEC_PPhi_tilde[is];
 		delete [] VEC_PPhi_tildeFLIP[is];
 		delete [] VEC_PT[is];
-		delete [] VEC_Pp[is];
-		delete [] VEC_alpha[is];
-		delete [] VEC_Pm[is];
-		delete [] VEC_alpha_m[is];
 	}
 	delete [] NEW_s_pts;
 	delete [] NEW_s_wts;
@@ -724,10 +659,6 @@ void CorrelationFunction::Delete_decay_channel_info()
 	delete [] VEC_PPhi_tilde;
 	delete [] VEC_PPhi_tildeFLIP;
 	delete [] VEC_PT;
-	delete [] VEC_Pp;
-	delete [] VEC_alpha;
-	delete [] VEC_Pm;
-	delete [] VEC_alpha_m;
 	if (VERBOSE > 2) *global_out_stream_ptr << "Deleted memory for decay channel information." << endl;
 
 	return;
@@ -737,7 +668,7 @@ void CorrelationFunction::Set_q_points()
 {
 	q_pts = new double [qnpts];
 	for (int iq = 0; iq < qnpts; ++iq)
-		q_pts = init_q + (double)iq * delta_q;
+		q_pts[iq] = init_q + (double)iq * delta_q;
 }
 
 bool CorrelationFunction::fexists(const char *filename)
@@ -1009,10 +940,10 @@ void CorrelationFunction::Edndp3(double ptr, double phir, double *** results)
 				// now, interpolate f1 and f2 over the pphi direction
 				results[iq][iqax][itrig] += lin_int(phir-phi0, one_by_pphidiff, f1, f2);
 			
-				if ( isnan( results[wfi] ) )
+				if ( isnan( results[iq][iqax][itrig] ) )
 				{
 					*global_out_stream_ptr << "ERROR in Edndp3(double, double, double*): problems encountered!" << endl
-						<< "results[" << wfi << "] = " << setw(8) << setprecision(15) << results[wfi] << endl
+						<< "results[" << iq << "][" << iqax << "][" << itrig << "] = " << setw(8) << setprecision(15) << results[iq][iqax][itrig] << endl
 						<< "  --> ptr = " << ptr << endl
 						<< "  --> pt0 = " << pT0 << endl
 						<< "  --> pt1 = " << pT1 << endl

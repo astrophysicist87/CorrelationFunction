@@ -169,16 +169,14 @@ class CorrelationFunction
 		double * VEC_pstar, * VEC_Estar, * VEC_DeltaY, * VEC_Yp, * VEC_Ym, * VEC_s_factor, * VEC_g_s;
 		double ** VEC_P_Y, ** VEC_MTbar, ** VEC_DeltaMT, ** VEC_MTp, ** VEC_MTm, ** VEC_v_factor;
 		double *** VEC_MT, *** VEC_PPhi_tilde, *** VEC_PPhi_tildeFLIP, *** VEC_PT, *** VEC_zeta_factor;
-        double *** ssum_vec, *** vsum_vec, *** zetasum_vec, *** Csum_vec;
+        	double *** ssum_vec, *** vsum_vec, *** zetasum_vec, *** Csum_vec;
 		
 		//Emission function
-		vector<Emissionfunction_data>* Emissionfunction_ptr;
 		int FO_length;
 		int Emissionfunction_length;
-		vector<Emissionfunction_data>* avgFOsurf_ptr;
 		
 		double *** spectra;
-        double **** CFvals;
+        	double **** CFvals;
 		
 		double * q_out, * q_side, * q_long, * q_pts, * q_axes;
 		
@@ -222,7 +220,7 @@ class CorrelationFunction
 		~CorrelationFunction();
 
 		void Determine_plane_angle(FO_surf* FOsurf_ptr, int dc_idx);
-		void Analyze_sourcefunction(FO_surf* FOsurf_ptr);
+		void Compute_correlation_function(FO_surf* FOsurf_ptr);
 		void Update_sourcefunction(particle_info* particle, int FOarray_length, int particle_idx);
 		bool fexists(const char *filename);
 
@@ -272,6 +270,10 @@ class CorrelationFunction
 		int lookup_resonance_idx_from_particle_id(int particle_id);
 		static inline double lin_int(double x_m_x1, double one_by_x2_m_x1, double f1, double f2);
 		void Edndp3(double ptr, double phir, double *** results);
+		void Set_q_points();
+		void Allocate_resonance_running_sum_vectors();
+		void Delete_resonance_running_sum_vectors();
+		void Zero_resonance_running_sum_vector(double *** vec);
 
 		// input and output function prototypes
 		void Output_dN_dypTdpTdphi(int folderindex);

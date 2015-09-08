@@ -1,0 +1,52 @@
+SHELL=/bin/sh
+
+SRCDIR= \
+../src
+
+SRCS= \
+correlation_function_with_resonances.cpp \
+$(SRCDIR)/readindata.cpp \
+$(SRCDIR)/CFWR.cpp \
+$(SRCDIR)/CFWR_admin.cpp \
+$(SRCDIR)/CFWR_resonance.cpp \
+$(SRCDIR)/CFWR_IO.cpp \
+$(SRCDIR)/Arsenal.cpp \
+$(SRCDIR)/gauss_quadrature.cpp
+
+HDRS= \
+correlation_function_with_resonances.h \
+$(SRCDIR)/parameters.h \
+$(SRCDIR)/readindata.h \
+$(SRCDIR)/CFWR.h \
+$(SRCDIR)/Arsenal.h \
+$(SRCDIR)/Stopwatch.h \
+$(SRCDIR)/gauss_quadrature.h \
+$(SRCDIR)/structs.h \
+$(SRCDIR)/generate_processing_record.h \
+$(SRCDIR)/plumberglib.h \
+$(SRCDIR)/sorter.h
+
+MAKEFILE=make_CFWR
+
+COMMAND=correlation_function_with_resonances
+
+OBJS= $(addsuffix .o, $(basename $(SRCS)))
+
+CC= g++
+CFLAGS=  -g -pg
+WARNFLAGS= -ansi -pedantic -Wall -W \
+   -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
+   -Wwrite-strings -fshort-enums -fno-common 
+LDFLAGS= -lgsl -lgslcblas -g
+LIBS= -L/sw/lib -I/sw/include
+
+ 
+$(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
+	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(LIBS) $(CFLAGS)
+                 
+clean:
+	rm -f $(OBJS)
+ 
+tarz:
+	tar zcf - $(MAKEFILE) $(SRCS) $(HDRS) > $(COMMAND).tar.gz
+ 

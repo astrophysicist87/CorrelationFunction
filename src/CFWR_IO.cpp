@@ -99,7 +99,7 @@ for(int iKT = 0; iKT < n_localp_T; iKT++)
 }
 
 
-void CorrelationFunction::Output_all_dN_dypTdpTdphi(int folderindex)
+/*void CorrelationFunction::Output_all_dN_dypTdpTdphi(int folderindex)
 {
 	for(int wfi = 0; wfi < n_weighting_functions; wfi++)
 	{
@@ -143,7 +143,7 @@ void CorrelationFunction::Output_total_target_dN_dypTdpTdphi(int folderindex)
 	}
 
 	return;
-}
+}*/
 
 void CorrelationFunction::Output_chosen_resonances()
 {
@@ -160,7 +160,7 @@ void CorrelationFunction::Output_chosen_resonances()
 	return;
 }
 
-void CorrelationFunction::Read_in_all_dN_dypTdpTdphi(int folderindex)
+/*void CorrelationFunction::Read_in_all_dN_dypTdpTdphi(int folderindex)
 {
 	for(int wfi = 0; wfi < n_weighting_functions; wfi++)
 	{
@@ -222,6 +222,6 @@ void CorrelationFunction::Read_in_all_dN_dypTdpTdphi(int folderindex)
 	input_pphipts.close();
 
 	return;
-}
+}*/
 
 //End of file

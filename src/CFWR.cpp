@@ -429,14 +429,20 @@ bool CorrelationFunction::particles_are_the_same(int reso_idx1, int reso_idx2)
 
 void CorrelationFunction::Recycle_spacetime_moments()
 {
-	for(int wfi = 0; wfi < n_weighting_functions; ++wfi)
+	for (int iq = 0; iq < qnpts; ++iq)
+	for (int iqax = 0; iqax < 3; ++iqax)
+	for (int itrig = 0; itrig < 2; ++itrig)
 	for(int ipt = 0; ipt < n_interp_pT_pts; ++ipt)
 	for(int iphi = 0; iphi < n_interp_pphi_pts; ++iphi)
 	{
-		dN_dypTdpTdphi_moments[current_resonance_particle_id][wfi][ipt][iphi] = dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][wfi][ipt][iphi];
-		ln_dN_dypTdpTdphi_moments[current_resonance_particle_id][wfi][ipt][iphi] = ln_dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][wfi][ipt][iphi];
-		sign_of_dN_dypTdpTdphi_moments[current_resonance_particle_id][wfi][ipt][iphi] = sign_of_dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][wfi][ipt][iphi];
+		dN_dypTdpTdphi_moments[current_resonance_particle_id][iq][iqax][itrig][ipt][iphi]
+				= dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][iq][iqax][itrig][ipt][iphi];
+		ln_dN_dypTdpTdphi_moments[current_resonance_particle_id][iq][iqax][itrig][ipt][iphi]
+				= ln_dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][iq][iqax][itrig][ipt][iphi];
+		sign_of_dN_dypTdpTdphi_moments[current_resonance_particle_id][iq][iqax][itrig][ipt][iphi]
+				= sign_of_dN_dypTdpTdphi_moments[reso_particle_id_of_moments_to_recycle][iq][iqax][itrig][ipt][iphi];
 	}
+
 
 	return;
 }
