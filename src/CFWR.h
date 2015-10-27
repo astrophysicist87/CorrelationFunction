@@ -187,9 +187,11 @@ class CorrelationFunction
 		double * Correl_1D_side_err;
 		double * Correl_1D_long;
 		double * Correl_1D_long_err;
+		double ** lambda_Correl, ** lambda_Correl_err;
 
 		//HBT radii coefficients
 		double **R2_side, **R2_out, **R2_long, **R2_outside, **R2_sidelong, **R2_outlong;
+		double **R2_side_err, **R2_out_err, **R2_long_err, **R2_outside_err, **R2_sidelong_err, **R2_outlong_err;
 		double **R2_side_C, **R2_side_S;
 		double **R2_out_C, **R2_out_S;
 		double **R2_long_C, **R2_long_S;
@@ -275,6 +277,15 @@ class CorrelationFunction
 		void Delete_resonance_running_sum_vectors();
 		void Zero_resonance_running_sum_vector(double *** vec);
 
+		// Gaussian fit / correlation function routines
+		void Get_GF_HBTradii(FO_surf* FOsurf_ptr, int folderindex);
+		void Cal_correlationfunction_1D();
+		void Fit_Correlationfunction1D(char osl_switch, int iKT, int iKphi);
+		int print_fit_state_1D (size_t iteration, gsl_multifit_fdfsolver * solver_ptr);
+		int Read_correlationfunction_1D(int iKT, int iKphi);
+		inline double get_fit_results(int i, gsl_multifit_fdfsolver * solver_ptr);
+		inline double get_fit_err (int i, gsl_matrix * covariance_ptr);
+
 		// input and output function prototypes
 		void Output_dN_dypTdpTdphi(int folderindex);
 		void Output_dN_dypTdpT(int folderindex);
@@ -284,6 +295,7 @@ class CorrelationFunction
 		void Readin_results(int folderindex);
 		void Read_in_all_dN_dypTdpTdphi(int folderindex);
 		void Output_chosen_resonances();
+		void Output_Correlationfunction_1D(int folderindex);
 
 		//parameters that the user is free to define
 		double plumberg_test_variable;

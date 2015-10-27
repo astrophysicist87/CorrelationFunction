@@ -23,62 +23,66 @@ using namespace std;
 
 void CorrelationFunction::Get_GF_HBTradii(FO_surf* FOsurf_ptr, int folderindex)
 {
-   bool includezeroes = false;
+	bool read_in_correlation_function = false;
 
-   for(int iKT = 0; iKT < n_localp_T; iKT++)
-   {
-      //cout << "\t Calculating K_T = " << K_T[iKT] << " GeV ..." << endl;
-      *global_out_stream_ptr << "   - Calculating K_T = " << K_T[iKT] << " GeV ..." << endl;
-      for(int iKphi = 0; iKphi < n_localp_phi; iKphi++)
-      {
-         *global_out_stream_ptr << "\t\t --> Calculating K_phi = " << K_phi[iKphi] << " ..." << endl;
-         Reset_EmissionData();
-         SetEmissionData(FOsurf_ptr, K_T[iKT], K_phi[iKphi], includezeroes);
-	 if (corrfuncdim == 1)
-	 {
-		Cal_correlationfunction_1D();
-		Fit_Correlationfunction1D('o', iKT, iKphi);
-		Fit_Correlationfunction1D('s', iKT, iKphi);
-		Fit_Correlationfunction1D('l', iKT, iKphi);
-		Output_Correlationfunction_1D(iKT, iKphi, folderindex);
-	 }
-	 else if (corrfuncdim == 3)
-	 {
-		//Cal_correlationfunction_3D(iKT, iKphi);
-		//if (lambdaflag)
-		//	Fit_Correlationfunction3D_withlambda(iKT, iKphi);
-		//else Fit_Correlationfunction3D(iKT, iKphi);
-		//Output_Correlationfunction_3D(iKT, iKphi, folderindex);
-        cerr << "corrfuncdim == 3 not currently supporter!" << endl;
-	 }
-      }
-      R2_Fourier_transform(iKT, global_plane_psi);
-   }
+	*global_out_stream_ptr << "--> Getting HBT radii by Gaussian fit method" << endl;
+	for(int iKT = 0; iKT < n_localp_T; iKT++)
+	{
+      	*global_out_stream_ptr << "   - Calculating K_T = " << K_T[iKT] << " GeV ..." << endl;
+		for(int iKphi = 0; iKphi < n_localp_phi; iKphi++)
+		{
+			*global_out_stream_ptr << "\t\t --> Calculating K_phi = " << K_phi[iKphi] << " ..." << endl;
+			if (corrfuncdim == 1)
+			{
+				if (read_in_correlation_function)
+					Read_correlationfunction_1D(iKT, iKphi);
+				else
+					Cal_correlationfunction_1D();
+				//Fit_Correlationfunction1D('o', iKT, iKphi);
+				//Fit_Correlationfunction1D('s', iKT, iKphi);
+				//Fit_Correlationfunction1D('l', iKT, iKphi);
+				if (!read_in_correlation_function)
+					Output_Correlationfunction_1D(folderindex);
+	 		}
+			else if (corrfuncdim == 3)
+			{
+				//Cal_correlationfunction_3D(iKT, iKphi);
+				//if (lambdaflag)
+				//	Fit_Correlationfunction3D_withlambda(iKT, iKphi);
+				//else Fit_Correlationfunction3D(iKT, iKphi);
+				//Output_Correlationfunction_3D(iKT, iKphi, folderindex);
+				cerr << "corrfuncdim == 3 not currently supported!" << endl;
+			}
+			else
+				cerr << "corrfuncdim == " << corrfuncdim << " not currently supported!" << endl;
+		}
+		R2_Fourier_transform(iKT, global_plane_psi);
+	}
 }
 
 void CorrelationFunction::Cal_correlationfunction_1D()
 {
-    // Get spectra first
+	// Get spectra first
 	for (int ipt = 0; ipt < n_interp_pT_pts; ++ipt)
-	for (int iphi = 0; iphi < n_interp_pphi_pts; ++iphi)
-    {
-        double integ1 = dN_dypTdpTdphi_moments[target_particle_id][0][0][0][ipt][ipphi];
-        double integ2 = dN_dypTdpTdphi_moments[target_particle_id][0][0][1][ipt][ipphi];
-        spectra[target_particle_id][ipt][ipphi] = integ1*integ1 + integ2*integ2;
-    }
+	for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
+	{
+  	      double integ1 = dN_dypTdpTdphi_moments[target_particle_id][0][0][0][ipt][ipphi];
+  	      double integ2 = dN_dypTdpTdphi_moments[target_particle_id][0][0][1][ipt][ipphi];
+  	      spectra[target_particle_id][ipt][ipphi] = sqrt(integ1*integ1 + integ2*integ2);
+	}
 
-    // Then compute full correlation function
+	// Then compute full correlation function
 	for (int ipt = 0; ipt < n_interp_pT_pts; ++ipt)
-	for (int iphi = 0; iphi < n_interp_pphi_pts; ++iphi)
-    for (int iq = 0; iq < qnpts; ++iq)
-    for (int iqax = 0; iqax < 3; ++iqax)
-    {
-        double integ1 = dN_dypTdpTdphi_moments[target_particle_id][iq][iqax][0][ipt][ipphi];
-        double integ2 = dN_dypTdpTdphi_moments[target_particle_id][iq][iqax][1][ipt][ipphi];
-        CFvals[ipt][ipphi][iq][iqax] = (integ1*integ1 + integ2*integ2) / spectra[target_particle_id][ipt][ipphi];
-    }
+	for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
+	for (int iq = 0; iq < qnpts; ++iq)
+	for (int iqax = 0; iqax < 3; ++iqax)
+	{
+		double integ1 = dN_dypTdpTdphi_moments[target_particle_id][iq][iqax][0][ipt][ipphi];
+		double integ2 = dN_dypTdpTdphi_moments[target_particle_id][iq][iqax][1][ipt][ipphi];
+		CFvals[ipt][ipphi][iq][iqax] = (integ1*integ1 + integ2*integ2) / (spectra[target_particle_id][ipt][ipphi]*spectra[target_particle_id][ipt][ipphi]);
+	}
 
-    return;
+	return;
 }
 
 int CorrelationFunction::Read_correlationfunction_1D(int iKT, int iKphi)
@@ -142,11 +146,11 @@ void CorrelationFunction::Fit_Correlationfunction1D(char osl_switch, int iKT, in
   gsl_rng *rng_ptr = gsl_rng_alloc (type);
 
   //set up test data
-  struct Correlationfunction1D_data Correlfun1D_data;
-  Correlfun1D_data.data_length = data_length;
-  Correlfun1D_data.q = new double [data_length];
-  Correlfun1D_data.y = new double [data_length];
-  Correlfun1D_data.sigma = new double [data_length];
+  struct Correlationfunction1D_data Correlationfunction1D_data;
+  Correlationfunction1D_data.data_length = data_length;
+  Correlationfunction1D_data.q = new double [data_length];
+  Correlationfunction1D_data.y = new double [data_length];
+  Correlationfunction1D_data.sigma = new double [data_length];
 
 switch(osl_switch)
 {
@@ -154,27 +158,27 @@ switch(osl_switch)
   //cout << "in the out loop!" << endl;
   for(int i=0; i<data_length; i++)
   {
-     Correlfun1D_data.q[i] = q_out[i];
-     Correlfun1D_data.y[i] = Correl_1D_out[i];
-     Correlfun1D_data.sigma[i] = Correl_1D_out_err[i];
+     Correlationfunction1D_data.q[i] = q_pts[i];
+     Correlationfunction1D_data.y[i] = CFvals[iKT][iKphi][i][0];
+     Correlationfunction1D_data.sigma[i] = 1.e-3;
   }
   break;
   case 's':
   //cout << "in the side loop!" << endl;
   for(int i=0; i<data_length; i++)
   {
-     Correlfun1D_data.q[i] = q_side[i];
-     Correlfun1D_data.y[i] = Correl_1D_side[i];
-     Correlfun1D_data.sigma[i] = Correl_1D_side_err[i];
+     Correlationfunction1D_data.q[i] = q_pts[i];
+     Correlationfunction1D_data.y[i] = CFvals[iKT][iKphi][i][1];
+     Correlationfunction1D_data.sigma[i] = 1.e-3;
   }
   break;
   case 'l':
   //cout << "in the long loop!" << endl;
   for(int i=0; i<data_length; i++)
   {
-     Correlfun1D_data.q[i] = q_long[i];
-     Correlfun1D_data.y[i] = Correl_1D_long[i];
-     Correlfun1D_data.sigma[i] = Correl_1D_long_err[i];
+     Correlationfunction1D_data.q[i] = q_pts[i];
+     Correlationfunction1D_data.y[i] = CFvals[iKT][iKphi][i][2];
+     Correlationfunction1D_data.sigma[i] = 1.e-3;
   }
   break;
 }
@@ -190,7 +194,7 @@ switch(osl_switch)
   target_func.fdf = &Fittarget_correlfun1D_fdf;    // combined function and gradient
   target_func.n = data_length;              // number of points in the data set
   target_func.p = n_para;              // number of parameters in the fit function
-  target_func.params = &Correlfun1D_data;  // structure with the data and error bars
+  target_func.params = &Correlationfunction1D_data;  // structure with the data and error bars
 
   const gsl_multifit_fdfsolver_type *type_ptr = gsl_multifit_fdfsolver_lmsder;
   gsl_multifit_fdfsolver *solver_ptr 
@@ -211,7 +215,7 @@ switch(osl_switch)
       //cout << "status = " << gsl_strerror (status) << endl;
 
       // customized routine to print out current parameters
-      //print_fit_state_1D (iteration, solver_ptr);
+      print_fit_state_1D (iteration, solver_ptr);
 
       if (status)    // check for a nonzero status code
       {
@@ -220,7 +224,7 @@ switch(osl_switch)
 
       // test for convergence with an absolute and relative error (see manual)
       status = gsl_multifit_test_delta (solver_ptr->dx, solver_ptr->x, 
-                                        fit_tolarence, fit_tolarence);
+                                        fit_tolerance, fit_tolerance);
   }
   while (status == GSL_CONTINUE && iteration < fit_max_iterations);
 
@@ -279,9 +283,9 @@ switch(osl_switch)
   gsl_matrix_free (covariance_ptr);
   gsl_rng_free (rng_ptr);
 
-  delete[] Correlfun1D_data.q;
-  delete[] Correlfun1D_data.y;
-  delete[] Correlfun1D_data.sigma;
+  delete[] Correlationfunction1D_data.q;
+  delete[] Correlationfunction1D_data.y;
+  delete[] Correlationfunction1D_data.sigma;
 
   gsl_multifit_fdfsolver_free (solver_ptr);  // free up the solver
 

@@ -13,7 +13,7 @@ using namespace std;
 #define GROUPING_PARTICLES 		0		// set to 1 to perform calculations for similar particles together
 #define PARTICLE_DIFF_TOLERANCE 	0.00		// particles with mass and chemical potential (for each FO-cell) difference less than this value
 							// will be considered to be identical (b/c Cooper-Frye)
-#define TRUNCATE_COOPER_FRYE		true		// ignore contributions to CF integral which are extremely small --> speeds up code by factor of 3-4
+#define TRUNCATE_COOPER_FRYE		false		// ignore contributions to CF integral which are extremely small --> speeds up code by factor of 3-4
 #define VERBOSE 			1		// specifies level of output - 0 is lowest (no output)
 #define DEBUG				false		// flag for output of debugging statements
 #define SPACETIME_MOMENTS_ONLY		false		// duh
@@ -36,8 +36,8 @@ const double eta_s_i = 0.0;
 const double eta_s_f = 4.0;
 
 //relative momentum information
-const int qnpts = 51;
-const double delta_q = 0.02;
+const int qnpts = 5;
+const double delta_q = 0.04;
 const double init_q = 0.;
 
 //single particle spectra info
@@ -75,6 +75,10 @@ const double tol = 0.0;		//tolerance
 const int flagneg = 0;		//neglect all points that are negative
 				//choose flagneg == 0 to agree with iS.e
 				//choose flagneg == 1 for the real world
+
+const size_t fit_max_iterations = 1000;  // stop at this point if not converged 
+const double fit_tolerance = 1e-6;
+
 //misc. resonance info
 const double max_lifetime = 100.;	// fm/c
 

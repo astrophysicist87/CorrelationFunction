@@ -146,16 +146,15 @@ int main(int argc, char *argv[])
 
    correlation_function.Update_sourcefunction(&particle[particle_idx], FO_length, particle_idx);
 
-   output << "Calculating HBT radii via source variances method..." << endl;
-   //correlation_function.Analyze_sourcefunction(FOsurf_ptr);		//with previous function, this argument is redundant
+   output << "Calculating HBT radii via Gaussian fit method..." << endl;
+   correlation_function.Compute_correlation_function(FOsurf_ptr);
+   correlation_function.Get_GF_HBTradii(FOsurf_ptr, folderindex);	//does outputting of results too
    
-//correlation_function.test_function(FOsurf_ptr, particle_idx);
-//output << "Outputting interpolation test data for " << particle[particle_idx].name << endl;
-
-   //correlation_function.Output_total_target_dN_dypTdpTdphi(folderindex);
-   correlation_function.Output_chosen_resonances();
-   correlation_function.Output_results(folderindex);
-   output << "Finished calculating HBT radii via source variances method" << endl;
+   correlation_function.Output_total_target_dN_dypTdpTdphi(folderindex);
+   //correlation_function.Output_chosen_resonances();
+   //correlation_function.Output_results(folderindex);
+   //correlation_function.Output_Correlationfunction_1D(folderindex);
+   output << "Finished calculating HBT radii via Gaussian fit method" << endl;
 
 
 

@@ -10,6 +10,7 @@ $(SRCDIR)/CFWR.cpp \
 $(SRCDIR)/CFWR_admin.cpp \
 $(SRCDIR)/CFWR_resonance.cpp \
 $(SRCDIR)/CFWR_IO.cpp \
+$(SRCDIR)/CFWR_GFroutines.cpp \
 $(SRCDIR)/Arsenal.cpp \
 $(SRCDIR)/gauss_quadrature.cpp
 

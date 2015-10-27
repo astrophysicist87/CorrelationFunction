@@ -31,6 +31,7 @@ SRC		=	correlation_function_with_resonances.cpp \
 			$(SRCDIR)/CFWR_admin.cpp \
 			$(SRCDIR)/CFWR_resonance.cpp \
 			$(SRCDIR)/CFWR_IO.cpp \
+			$(SRCDIR)/CFWR_GFroutines.cpp \
 			$(SRCDIR)/Arsenal.cpp \
 			$(SRCDIR)/gauss_quadrature.cpp
 
@@ -97,6 +98,7 @@ $(SRCDIR)/Arsenal.cpp: $(SRCDIR)/Arsenal.h
 $(SRCDIR)/CFWR.cpp: $(SRCDIR)/CFWR.h $(SRCDIR)/Arsenal.h $(SRCDIR)/gauss_quadrature.h $(SRCDIR)/Stopwatch.h
 $(SRCDIR)/CFWR_admin.cpp: $(SRCDIR)/CFWR.h $(SRCDIR)/Arsenal.h $(SRCDIR)/gauss_quadrature.h
 $(SRCDIR)/CFWR_IO.cpp: $(SRCDIR)/CFWR.h $(SRCDIR)/Arsenal.h $(SRCDIR)/gauss_quadrature.h
+$(SRCDIR)/CFWR_GFroutines.cpp: $(SRCDIR)/CFWR.h $(SRCDIR)/Arsenal.h $(SRCDIR)/gauss_quadrature.h
 $(SRCDIR)/CFWR_resonance.cpp: $(SRCDIR)/CFWR.h $(SRCDIR)/Arsenal.h $(SRCDIR)/gauss_quadrature.h
 $(SRCDIR)/readindata.cpp: $(SRCDIR)/readindata.h
 

@@ -144,9 +144,10 @@ bool CorrelationFunction::Do_this_decay_channel(int dc_idx)
 		local_name = decay_channels[dc_idx-1].resonance_name;
 		Get_current_decay_string(dc_idx, &current_decay_channel_string);
 	}
-	if (DO_ALL_DECAY_CHANNELS)
-		return true;
-	else if (decay_channels[dc_idx-1].include_channel)
+	//if (DO_ALL_DECAY_CHANNELS)
+	//	return true;
+	//else if (decay_channels[dc_idx-1].include_channel)
+	if (decay_channels[dc_idx-1].include_channel)
 	{
 		;
 	}
@@ -584,20 +585,20 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 		eta_odd_factor = 0.0;
 		eta_even_factor = 2.0;
 	}
-
+//debugger(__LINE__, __FILE__);
 	for(int ipt = 0; ipt < n_interp_pT_pts; ++ipt)
 	{
 		double pT = SPinterp_pT[ipt];
 		double * p0_pTslice = SPinterp_p0[ipt];
 		double * pz_pTslice = SPinterp_pz[ipt];
-
+//debugger(__LINE__, __FILE__);
 		for(int iphi = 0; iphi < n_interp_pphi_pts; ++iphi)
 		{
 			double sin_pphi = sin_SPinterp_pphi[iphi];
 			double cos_pphi = cos_SPinterp_pphi[iphi];
 			double px = pT*cos_pphi;
 			double py = pT*sin_pphi;
-
+//debugger(__LINE__, __FILE__);
 			for (int iq = 0; iq < qnpts; ++iq)
 			for (int iqax = 0; iqax < 3; ++iqax)
 			for (int itrig = 0; itrig < 2; ++itrig)
@@ -605,6 +606,7 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 
 			for(int isurf=0; isurf<FO_length; ++isurf)
 			{
+//debugger(__LINE__, __FILE__);
 				FO_surf * surf = &FOsurf_ptr[isurf];
 
 				double tau = surf->tau;
@@ -629,6 +631,7 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 
 				for(int ieta=0; ieta < eta_s_npts; ++ieta)
 				{
+//debugger(__LINE__, __FILE__);
 					double p0 = p0_pTslice[ieta];
 					double pz = pz_pTslice[ieta];
 					double expon, f0;
@@ -659,15 +662,18 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 					if ((1. + deltaf < 0.0) || (flagneg == 1 && S_p < tol))
 						S_p = 0.0;
 
-					double S_p_withweight = S_p*eta_even_factor*tau*eta_s_weight[ieta];
+					//double S_p_withweight = S_p*eta_even_factor*tau*eta_s_weight[ieta];
+					double S_p_withweight = S_p*tau*eta_s_weight[ieta];		//eta_even_factor assumed in zpt loop below
 
 					for (int iq = 0; iq < qnpts; ++iq)
 					{
+//debugger(__LINE__, __FILE__);
 						q_axes[0] = 0.0;	// qo
 						q_axes[1] = 0.0;	// qs
 						q_axes[2] = 0.0;	// ql
 						for (int iqax = 0; iqax < 3; ++iqax)
 						{
+//debugger(__LINE__, __FILE__);
 							q_axes[iqax] = q_pts[iq];
 							double xsi  = pT*pT + localmass*localmass + 0.25*(q_axes[0]*q_axes[0] + q_axes[1]*q_axes[1] + q_axes[2]*q_axes[2]);
 							double E1sq = xsi + pT*q_axes[0];
@@ -679,6 +685,7 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 		
 							for(int ii = 0; ii < 2; ++ii)
 							{
+//debugger(__LINE__, __FILE__);
 								zpt *= -1.0;		//using the symmetry along z axis
 								double arg = hbarCm1*(tpt*qt - (qx*xpt + qy*ypt + qz*zpt));
 								local_temp_moments[iq][iqax][0] += cos(arg)*S_p_withweight;

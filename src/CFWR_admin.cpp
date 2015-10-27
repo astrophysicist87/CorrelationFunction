@@ -55,6 +55,8 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 	currentfolderindex = -1;
 	current_level_of_output = 0;
 
+	Set_q_points();
+
 	n_zeta_pts = 12;
 	n_v_pts = 12;
 	n_s_pts = 12;
@@ -155,8 +157,8 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 				
 				//check if particle lifetime is too long for inclusion in source variances
 				bool lifetime_is_too_long = false;
-				if (decay_channels[temp_idx].resonance_Gamma < hbarC / max_lifetime)
-					lifetime_is_too_long = true;		//i.e., for lifetimes longer than 100 fm/c, skip decay channel
+				//if (decay_channels[temp_idx].resonance_Gamma < hbarC / max_lifetime)
+				//	lifetime_is_too_long = true;		//i.e., for lifetimes longer than 100 fm/c, skip decay channel
 
 				if (VERBOSE > 0) *global_out_stream_ptr << "Resonance = " << decay_channels[temp_idx].resonance_name << ", decay channel " << idecay + 1
 						<< ": mu=" << decay_channels[temp_idx].resonance_mu
@@ -179,8 +181,7 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 					decay_channels[temp_idx].include_channel = true;
 				else
 					decay_channels[temp_idx].include_channel = (!lifetime_is_too_long
-											//&& !too_many_daughters
-											&& !effective_br_is_too_small);
+																	&& !effective_br_is_too_small);
 
 				temp_idx++;
 			}
@@ -230,6 +231,36 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 		}
 	}
 
+	// initialize spectra and correlation function arrays
+	spectra = new double ** [Nparticle];
+	for (int ir=0; ir<Nparticle; ir++)
+	{
+		spectra[ir] = new double * [n_interp_pT_pts];
+		for (int ipT = 0; ipT < n_interp_pT_pts; ++ipT)
+		{
+			spectra[ir][ipT] = new double [n_interp_pphi_pts];
+			for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
+				spectra[ir][ipT][ipphi] = 0.0;
+		}
+	}
+
+	CFvals = new double *** [n_interp_pT_pts];
+	for (int ipT = 0; ipT < n_interp_pT_pts; ++ipT)
+	{
+		CFvals[ipT] = new double ** [n_interp_pphi_pts];
+		for (int ipphi = 0; ipphi < n_interp_pphi_pts; ++ipphi)
+		{
+			CFvals[ipT][ipphi] = new double * [qnpts];
+			for (int iq = 0; iq < qnpts; ++iq)
+			{
+				CFvals[ipT][ipphi][iq] = new double [3];
+				for (int iqax = 0; iqax < 3; ++iqax)
+					CFvals[ipT][ipphi][iq][iqax] = 0.0;
+			}
+		}
+	}
+
+	// set-up integration points for resonance integrals
 	s_pts = new double * [n_decay_channels];
 	s_wts = new double * [n_decay_channels];
 	v_pts = new double [n_v_pts];
@@ -386,6 +417,16 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 	R2_outlong_C = new double* [n_localp_T];
 	R2_outlong_S = new double* [n_localp_T];
 
+	R2_side_err = new double* [n_localp_T];
+	R2_out_err = new double* [n_localp_T];
+	R2_long_err = new double* [n_localp_T];
+	R2_outside_err = new double* [n_localp_T];
+	R2_sidelong_err = new double* [n_localp_T];
+	R2_outlong_err = new double* [n_localp_T];
+
+	lambda_Correl = new double * [n_localp_T];
+	lambda_Correl_err = new double * [n_localp_T];
+
 	for(int i=0; i<n_localp_T; i++)
 	{
 		R2_side[i] = new double [n_localp_phi];
@@ -406,6 +447,16 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 		R2_outlong[i] = new double [n_localp_phi];
 		R2_outlong_C[i] = new double [n_order];
 		R2_outlong_S[i] = new double [n_order];
+
+		R2_side_err[i] = new double [n_localp_phi];
+		R2_out_err[i] = new double [n_localp_phi];
+		R2_long_err[i] = new double [n_localp_phi];
+		R2_outside_err[i] = new double [n_localp_phi];
+		R2_sidelong_err[i] = new double [n_localp_phi];
+		R2_outlong_err[i] = new double [n_localp_phi];
+
+		lambda_Correl[i] = new double [n_localp_phi];
+		lambda_Correl_err[i] = new double [n_localp_phi];
 	}
 
 	//initialize all source variances and HBT radii/coeffs
@@ -419,6 +470,16 @@ CorrelationFunction::CorrelationFunction(particle_info* particle, particle_info*
 			R2_outside[i][j] = 0.;
 			R2_sidelong[i][j] = 0.;
 			R2_outlong[i][j] = 0.;
+
+			R2_side_err[i][j] = 0.;
+			R2_out_err[i][j] = 0.;
+			R2_long_err[i][j] = 0.;
+			R2_outside_err[i][j] = 0.;
+			R2_sidelong_err[i][j] = 0.;
+			R2_outlong_err[i][j] = 0.;
+
+			lambda_Correl[i][j] = 0.0;
+			lambda_Correl_err[i][j] = 0.0;
 		}
 		for(int j=0; j<n_order; j++)
 		{
@@ -669,6 +730,7 @@ void CorrelationFunction::Set_q_points()
 	q_pts = new double [qnpts];
 	for (int iq = 0; iq < qnpts; ++iq)
 		q_pts[iq] = init_q + (double)iq * delta_q;
+	q_axes = new double [3];
 }
 
 bool CorrelationFunction::fexists(const char *filename)

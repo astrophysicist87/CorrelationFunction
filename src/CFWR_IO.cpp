@@ -70,6 +70,26 @@ void CorrelationFunction::Output_results(int folderindex)
 	return;
 }
 
+void CorrelationFunction::Output_Correlationfunction_1D(int folderindex)
+{
+	ostringstream oCorrFunc_1D_stream;
+	string temp_particle_name = particle_name;
+	replace_parentheses(temp_particle_name);
+	oCorrFunc_1D_stream << global_path << "/correlfunct1D" << "_" << temp_particle_name << ".dat";
+	ofstream oCorrFunc_1D;
+	//oCorrFunc_1D.open(oCorrFunc_1D_stream.str().c_str(), ios::app);
+	oCorrFunc_1D.open(oCorrFunc_1D_stream.str().c_str());
+
+	for(int ipt = 0; ipt < n_interp_pT_pts; ipt++)
+	for(int ipphi = 0; ipphi < n_interp_pphi_pts; ipphi++)
+	for(int i = 0; i < qnpts; ++i)
+		oCorrFunc_1D << scientific << setprecision(7) << setw(15)
+			<< SPinterp_pT[ipt] << "   " << SPinterp_pphi[ipphi] << "   " << q_pts[i] << "   "
+			<< CFvals[ipt][ipphi][i][0] << "   " << CFvals[ipt][ipphi][i][1] << "   " << CFvals[ipt][ipphi][i][2] << endl;
+
+	return;
+}
+
 void CorrelationFunction::Readin_results(int folderindex)
 {
 double dummy;
@@ -99,23 +119,19 @@ for(int iKT = 0; iKT < n_localp_T; iKT++)
 }
 
 
-/*void CorrelationFunction::Output_all_dN_dypTdpTdphi(int folderindex)
+void CorrelationFunction::Output_all_dN_dypTdpTdphi(int folderindex)
 {
-	for(int wfi = 0; wfi < n_weighting_functions; wfi++)
+	ostringstream filename_stream_all_dN_dypTdpTdphi;
+	filename_stream_all_dN_dypTdpTdphi << global_path << "/all_res_dN_dypTdpTdphi_ev" << folderindex << no_df_stem << ".dat";
+	ofstream output_all_dN_dypTdpTdphi(filename_stream_all_dN_dypTdpTdphi.str().c_str());
+	for(int ii = 0; ii < Nparticle; ii++)
+	for(int iphi = 0; iphi < n_interp_pphi_pts; iphi++)
 	{
-		ostringstream filename_stream_all_dN_dypTdpTdphi;
-		filename_stream_all_dN_dypTdpTdphi << global_path << "/all_res_dN_dypTdpTdphi_mom_"
-						<< setfill('0') << setw(2) << wfi << "_ev" << folderindex << no_df_stem << ".dat";
-		ofstream output_all_dN_dypTdpTdphi(filename_stream_all_dN_dypTdpTdphi.str().c_str());
-		for(int ii = 0; ii < Nparticle; ii++)
-		for(int iphi = 0; iphi < n_interp_pphi_pts; iphi++)
-		{
-			for(int ipt = 0; ipt < n_interp_pT_pts; ipt++)
-				output_all_dN_dypTdpTdphi << scientific << setprecision(8) << setw(12) << dN_dypTdpTdphi_moments[ii][wfi][ipt][iphi] << "   ";
-			output_all_dN_dypTdpTdphi << endl;
-		}
-		output_all_dN_dypTdpTdphi.close();
+		for(int ipt = 0; ipt < n_interp_pT_pts; ipt++)
+			output_all_dN_dypTdpTdphi << scientific << setprecision(8) << setw(12) << spectra[ii][ipt][iphi] << "   ";
+		output_all_dN_dypTdpTdphi << endl;
 	}
+	output_all_dN_dypTdpTdphi.close();
 
 	return;
 }
@@ -124,26 +140,21 @@ void CorrelationFunction::Output_total_target_dN_dypTdpTdphi(int folderindex)
 {
 	string local_name = all_particles[target_particle_id].name;
 	replace_parentheses(local_name);
+	ostringstream filename_stream_target_dN_dypTdpTdphi;
+	filename_stream_target_dN_dypTdpTdphi << global_path << "/total_" << local_name << "_dN_dypTdpTdphi_ev" << folderindex << no_df_stem << ".dat";
+	ofstream output_target_dN_dypTdpTdphi(filename_stream_target_dN_dypTdpTdphi.str().c_str());
 
-	for(int wfi = 0; wfi < n_weighting_functions; wfi++)
+	for(int iphi = 0; iphi < n_interp_pphi_pts; iphi++)
 	{
-		ostringstream filename_stream_target_dN_dypTdpTdphi;
-		filename_stream_target_dN_dypTdpTdphi << global_path << "/total_" << local_name << "_dN_dypTdpTdphi_mom_"
-								<< setfill('0') << setw(2) << wfi << "_ev" << folderindex << no_df_stem << ".dat";
-		ofstream output_target_dN_dypTdpTdphi(filename_stream_target_dN_dypTdpTdphi.str().c_str());
-	
-		for(int iphi = 0; iphi < n_interp_pphi_pts; iphi++)
-		{
-			for(int ipt = 0; ipt < n_interp_pT_pts; ipt++)
-				output_target_dN_dypTdpTdphi << scientific << setprecision(8) << setw(12) << dN_dypTdpTdphi_moments[target_particle_id][wfi][ipt][iphi] << "   ";
-			output_target_dN_dypTdpTdphi << endl;
-		}
-	
-		output_target_dN_dypTdpTdphi.close();
+		for(int ipt = 0; ipt < n_interp_pT_pts; ipt++)
+			output_target_dN_dypTdpTdphi << scientific << setprecision(8) << setw(12) << spectra[target_particle_id][ipt][iphi] << "   ";
+		output_target_dN_dypTdpTdphi << endl;
 	}
 
+	output_target_dN_dypTdpTdphi.close();
+
 	return;
-}*/
+}
 
 void CorrelationFunction::Output_chosen_resonances()
 {

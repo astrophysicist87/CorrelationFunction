@@ -38,6 +38,7 @@ void sort_by_column(vector< vector<T> > * values)
 	return;
 }
 
+/*USAGE: debugger(__LINE__, __FILE__)*/
 void inline debugger(int cln, const char* cfn)
 {
 	cerr << "You made it to " << cfn << ":" << cln << "!" << endl;
