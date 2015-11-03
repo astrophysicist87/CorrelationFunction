@@ -17,7 +17,7 @@ using namespace std;
 #define VERBOSE 			1		// specifies level of output - 0 is lowest (no output)
 #define DEBUG				false		// flag for output of debugging statements
 #define SPACETIME_MOMENTS_ONLY		false		// duh
-#define DO_ALL_DECAY_CHANNELS		true		// duh
+#define DO_ALL_DECAY_CHANNELS		false		// duh
 
 const double hbarC=0.197327053;		//GeV*fm
 const double hbarC3=0.00768351405;
@@ -36,8 +36,8 @@ const double eta_s_i = 0.0;
 const double eta_s_f = 4.0;
 
 //relative momentum information
-const int qnpts = 5;
-const double delta_q = 0.04;
+const int qnpts = 50;
+const double delta_q = 0.005;
 const double init_q = 0.;
 
 //single particle spectra info

@@ -304,6 +304,7 @@ class CorrelationFunction
 		int n_events;
 		int initial_event, currentfolderindex;
 		bool read_in_all_dN_dypTdpTdphi, output_all_dN_dypTdpTdphi;
+		double fraction_of_resonances;
 };
 
 #endif

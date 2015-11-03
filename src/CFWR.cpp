@@ -589,11 +589,13 @@ void CorrelationFunction::Cal_dN_dypTdpTdphi_with_weights_polar(FO_surf* FOsurf_
 	for(int ipt = 0; ipt < n_interp_pT_pts; ++ipt)
 	{
 		double pT = SPinterp_pT[ipt];
+		//*global_out_stream_ptr << "\t pT = " << pT << endl;
 		double * p0_pTslice = SPinterp_p0[ipt];
 		double * pz_pTslice = SPinterp_pz[ipt];
 //debugger(__LINE__, __FILE__);
 		for(int iphi = 0; iphi < n_interp_pphi_pts; ++iphi)
 		{
+			//*global_out_stream_ptr << "\t pphi = " << SPinterp_pphi[iphi] << endl;
 			double sin_pphi = sin_SPinterp_pphi[iphi];
 			double cos_pphi = cos_SPinterp_pphi[iphi];
 			double px = pT*cos_pphi;

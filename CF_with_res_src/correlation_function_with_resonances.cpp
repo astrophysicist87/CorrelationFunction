@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
 	double threshold = atof(argv[1]);
 				//threshold = 1.0 means include all resonance-decay pion(+)s,
 				//threshold = 0.0 means include none of them
+	double net_fraction_resonance_contribution = 0.0;
 	output << "Working with threshold = " << threshold << endl;
 	vector<int> chosen_resonance_indices;
 	if (threshold > 1.0 + 1.e-10)
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		get_important_resonances(particle_idx, &chosen_resonance_indices, particle, Nparticle, threshold, output);
+		get_important_resonances(particle_idx, &chosen_resonance_indices, particle, Nparticle, threshold, net_fraction_resonance_contribution, output);
 		get_all_descendants(&chosen_resonance_indices, particle, Nparticle, output);
 		sort_by_mass(&chosen_resonance_indices, particle, Nparticle, output);
 		for (int ii = 0; ii < (int)chosen_resonance_indices.size(); ii++)
@@ -144,6 +145,12 @@ int main(int argc, char *argv[])
    correlation_function.Set_use_delta_f(true);
    correlation_function.Set_ofstream(output);
 
+   bool rescale_truncated_resonance_contributions = true;
+   if (rescale_truncated_resonance_contributions)
+	correlation_function.fraction_of_resonances = net_fraction_resonance_contribution;
+   else
+	correlation_function.fraction_of_resonances = 1.0;	//i.e., no rescaling
+
    correlation_function.Update_sourcefunction(&particle[particle_idx], FO_length, particle_idx);
 
    output << "Calculating HBT radii via Gaussian fit method..." << endl;
@@ -151,9 +158,8 @@ int main(int argc, char *argv[])
    correlation_function.Get_GF_HBTradii(FOsurf_ptr, folderindex);	//does outputting of results too
    
    correlation_function.Output_total_target_dN_dypTdpTdphi(folderindex);
-   //correlation_function.Output_chosen_resonances();
-   //correlation_function.Output_results(folderindex);
-   //correlation_function.Output_Correlationfunction_1D(folderindex);
+   correlation_function.Output_chosen_resonances();
+   correlation_function.Output_results(folderindex);
    output << "Finished calculating HBT radii via Gaussian fit method" << endl;
 
 

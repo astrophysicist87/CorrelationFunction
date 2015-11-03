@@ -121,7 +121,7 @@ void CorrelationFunction::Do_resonance_integrals(int parent_resonance_particle_i
 			for (int iqax = 0; iqax < 3; ++iqax)
 			for (int itrig = 0; itrig < 2; ++itrig)
 			{
-				dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] += ssum_vec[iq][iqax][itrig];
+				dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] += ssum_vec[iq][iqax][itrig] / fraction_of_resonances;
 				double temp = dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi];
 				ln_dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] = log(abs(temp));
 				sign_of_dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] = sgn(temp);
@@ -206,7 +206,7 @@ void CorrelationFunction::Do_resonance_integrals(int parent_resonance_particle_i
 			for (int iqax = 0; iqax < 3; ++iqax)
 			for (int itrig = 0; itrig < 2; ++itrig)
 			{
-				dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] += ssum_vec[iq][iqax][itrig];
+				dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] += ssum_vec[iq][iqax][itrig] / fraction_of_resonances;
 				double temp = dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi];
 				ln_dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] = log(abs(temp));
 				sign_of_dN_dypTdpTdphi_moments[daughter_particle_id][iq][iqax][itrig][ipt][ipphi] = sgn(temp);

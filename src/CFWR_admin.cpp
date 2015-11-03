@@ -510,6 +510,8 @@ void CorrelationFunction::Update_sourcefunction(particle_info* particle, int FOa
    particle_gspin = particle->gspin;
    particle_id = particle_idx;
 
+	*global_out_stream_ptr << "Inside Update_sourcefunction(...): using fraction_of_resonances = " << fraction_of_resonances << endl;
+
    //erase contents of single - and two-particle spectra
    for(int i=0; i<n_SP_pphi; i++)
    {
